@@ -7,18 +7,36 @@ edition = "2021"
 description = "A Rust backend with PostgreSQL using Actix-Web and SQLx"
 authors = ["Your Name <you@example.com>"]
 
-# Define the entry point
+# Define dependencies
 [dependencies]
-actix-web = "4.0"
-actix-web-actors = "4.0" # Optional, only needed if you use WebSockets
+actix = "0.13.0"
+actix-files = "0.6.2"
+actix-web = "4.2.1"
+actix-web-actors = "4.1.0"
+rand = "0.8.5"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tokio = { version = "1.0", features = ["full"] }
+tokio-tungstenite ="0.17"
+tungstenite ="0.15"
+
+futures ="0.3"
+futures-util = "0.3"
 dotenv = "0.15"
-sqlx = { version = "0.6", features = ["postgres", "runtime-tokio-native-tls", "macros"] }
-uuid = { version = "1.0", features = ["v4"] }
+sqlx = { version = "0.6", features = ["postgres", "runtime-tokio-native-tls", "macros","chrono","uuid"] }
+uuid = { version = "1.0", features = ["v4","serde"] }
+
 thiserror = "1.0"
-chrono = "0.4"
+chrono = { version = "0.4", features = ["serde"] }
+
+idna = "0.3"  # Use stable version of `idna`
+qrcode = "0.12.0"
+image = "0.23.14"
 
 [features]
 default = ["sqlx/postgres", "sqlx/runtime-tokio-native-tls"]
+
+# Explicitly define the binary entry point (optional)
+[[bin]]
+name = "chat-backend"
+path = "src/main.rs"  # Ensures the entry point is specified correctly

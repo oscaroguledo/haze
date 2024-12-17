@@ -26,7 +26,7 @@ services:
     environment:
       - DATABASE_URL=postgres://postgres:password@db:5432/mydatabase
     depends_on:
-      db:
+      postgresdb:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d mydatabase"]
@@ -34,9 +34,9 @@ services:
       timeout: 3s
       retries: 5
 
-  db:
+  postgresdb:
     image: postgres:15
-    container_name: postgres_db
+    container_name: postgresdb
     restart: always
     environment:
       POSTGRES_USER: postgres
