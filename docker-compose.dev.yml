@@ -3,11 +3,11 @@ version: '3.8'
 services:
   frontend:
     build:
-      context: ./my-app
+      context: ./frontend
     ports:
       - "3000:3000"
     volumes:
-      - ./my-app:/app
+      - ./frontend:/app
     command: npm start
     environment:
       - CHOKIDAR_USEPOLLING=true # To avoid file changes not detected in Docker
@@ -26,7 +26,13 @@ services:
     environment:
       - DATABASE_URL=postgres://postgres:password@db:5432/mydatabase
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mydatabase"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   db:
     image: postgres:15
@@ -38,3 +44,6 @@ services:
       POSTGRES_DB: mydatabase
     ports:
       - "5432:5432"
+    
+  
+

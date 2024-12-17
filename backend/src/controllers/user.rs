@@ -19,10 +19,11 @@ pub async fn get_users(db_pool: web::Data<PgPool>) -> impl Responder {
 pub async fn create_user(db_pool: web::Data<PgPool>, new_user: web::Json<User>) -> impl Responder {
     let id = Uuid::new_v4();
     let query = sqlx::query!(
-        "INSERT INTO users (id, name, email, created_at) VALUES ($1, $2, $3, now())",
+        "INSERT INTO users (id, name, email, password, created_at) VALUES ($1, $2, $3, $4, now())",
         id,
         new_user.name,
-        new_user.email
+        new_user.email,
+        new_user.password
     )
     .execute(db_pool.get_ref())
     .await;
