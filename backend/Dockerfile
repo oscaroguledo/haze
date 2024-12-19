@@ -1,47 +1,44 @@
-# Builder stage
-FROM rust:1.73 as builder
+# Use the Rust official image as a base image for the build stage
+FROM rust:1.72 as builder
 
-# Set the working directory
-WORKDIR /app
+# Set the working directory in the container
+WORKDIR /usr/src/app
 
-# Copy dependency files
+# Copy the Cargo.toml and Cargo.lock files first to leverage Docker caching
 COPY Cargo.toml Cargo.lock ./
-RUN cargo update
-# Pre-build dependencies (cache dependencies)
 
-RUN mkdir src && echo "fn main() {}" > src/main.rs
-RUN cargo build --release
-RUN rm -rf src
-
-# Install sqlx-cli for running migrations
-RUN cargo install sqlx-cli --features postgres
-
-# Copy application source code
-COPY ./src ./src
-
-# Copy migrations
-COPY ./migrations ./migrations
-
-# Set the database URL (adjust as needed)
-ENV DATABASE_URL=postgres://postgres:password@db:5432/mydatabase
-
-# Run database migrations during the build process
-RUN sqlx migrate run
-
-# Build the backend binary
+# Build dependencies to take advantage of Docker cache
 RUN cargo build --release
 
-# Runtime stage
-FROM debian:buster-slim
+# Copy the source code
+COPY src ./src
 
-# Install necessary libraries for PostgreSQL
-RUN apt-get update && apt-get install -y libpq-dev && rm -rf /var/lib/apt/lists/*
+# Build the project in release mode
+RUN cargo build --release
 
-# Copy the binary from the builder stage
-COPY --from=builder /app/target/release/backend .
+# Use the regular version of Ubuntu for a lighter base image
+FROM ubuntu:22.04
 
-# Expose the application port
+# Install necessary runtime dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libc6 \
+    libpq-dev \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy the compiled Rust binary from the builder image
+COPY --from=builder /usr/src/app/target/release/backend /usr/local/bin/backend
+
+# Copy the entrypoint script into the container
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+
+# Give executable permissions to the entrypoint script
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Set the entrypoint script to be executed when the container starts
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+# Expose the port that your backend listens on (adjust if needed)
 EXPOSE 8080
-
-# Run the application
-CMD ["./backend"]

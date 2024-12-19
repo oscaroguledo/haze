@@ -1,0 +1,44 @@
+mod operations;
+use dotenv::dotenv;
+use std::env;
+use operations::table::tb::{create_table, fetch_all_tables, fetch_table_by_name, delete_all_tables, delete_table_by_name};
+use operations::database::db::{create_pool, get_database_name};
+use serde_json::json; // For JSON output
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    dotenv().ok();
+
+    let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let pool = create_pool(&db_url).await?;
+    let schema_name = "public";
+
+    // Create a table
+    let table_name = "example_table";
+    let columns = "id SERIAL PRIMARY KEY, name VARCHAR(100)";
+    println!("\nCreating table '{}.{}'...", schema_name, table_name);
+    create_table(&pool, schema_name, table_name, columns).await?;
+
+    // Fetch all tables in the schema
+    println!("\nFetching all tables in schema '{}'...", schema_name);
+    let tables = fetch_all_tables(&pool, schema_name).await?;
+    println!("All tables: {}", tables);
+
+    // Fetch details of a specific table
+    println!("\nFetching details for table '{}.{}'...", schema_name, table_name);
+    if let Some(table) = fetch_table_by_name(&pool, schema_name, table_name).await? {
+        println!("Table details: {}", table);
+    } else {
+        println!("Table '{}.{}' does not exist.", schema_name, table_name);
+    }
+
+    // Delete the created table
+    println!("\nDeleting table '{}.{}'...", schema_name, table_name);
+    delete_table_by_name(&pool, schema_name, table_name).await?;
+
+    // Delete all tables in the schema
+    println!("\nDeleting all tables in schema '{}'...", schema_name);
+    delete_all_tables(&pool, schema_name).await?;
+
+    Ok(())
+}

@@ -1,5 +1,19 @@
 #!/bin/bash
 
+# Function to create the .env file with PostgreSQL credentials
+create_env_file() {
+    echo "Creating .env file with PostgreSQL credentials..."
+    cat <<EOL > .env
+# .env file with PostgreSQL credentials
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=password
+POSTGRES_DB=mydatabase
+DATABASE_URL=postgres://postgres:password@postgresdb:5432/mydatabase
+
+EOL
+    echo ".env file created with PostgreSQL credentials."
+}
+
 # Helper Functions
 print_usage() {
     echo "Usage: $0 [dev|prod|logs <container_name>|clean]"
@@ -62,6 +76,8 @@ clean_up() {
 
 # Main Script Logic
 check_docker_compose
+# Create the .env file with PostgreSQL credentials
+create_env_file
 
 case "$1" in
     dev)

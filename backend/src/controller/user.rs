@@ -3,7 +3,6 @@ use uuid::Uuid;
 use sqlx::PgPool;
 use crate::models::user::User;
 
-
 #[get("/users")]
 pub async fn get_users(db_pool: web::Data<PgPool>) -> impl Responder {
     let users = sqlx::query_as::<_, User>("SELECT * FROM users")
@@ -19,8 +18,6 @@ pub async fn get_users(db_pool: web::Data<PgPool>) -> impl Responder {
 #[post("/users")]
 pub async fn create_user(db_pool: web::Data<PgPool>, new_user: web::Json<User>) -> impl Responder {
     let id = Uuid::new_v4();
-    
-    // SQL query to insert a new user
     let query = sqlx::query!(
         "INSERT INTO users (id, name, email, password, created_at) VALUES ($1, $2, $3, $4, now())",
         id,
@@ -32,7 +29,7 @@ pub async fn create_user(db_pool: web::Data<PgPool>, new_user: web::Json<User>) 
     .await;
 
     match query {
-        Ok(_) => HttpResponse::Created().body("User created"), // Return HTTP 201 if user is created
-        Err(_) => HttpResponse::InternalServerError().body("Error creating user"), // Return HTTP 500 if error occurs
+        Ok(_) => HttpResponse::Created().body("User created"),
+        Err(_) => HttpResponse::InternalServerError().body("Error creating user"),
     }
 }

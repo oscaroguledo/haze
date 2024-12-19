@@ -1,16 +1,21 @@
+mod operations;
 mod controllers;
-mod libs;
-// mod websockets;
+mod websocket;
 mod db;
 mod models;
 mod routes;
+
+use dotenv::dotenv;
+use std::env;
+use operations::data::dt::{create_table, fetch_all_tables, fetch_table_by_name, delete_all_tables, delete_table_by_name};
+use operations::database::db::{create_pool, get_database_name};
+use serde_json::json; // For JSON output
 
 use actix_web::{App, HttpServer};
 // use actix_web::web::Data;
 
 // use actix_files::Files;
-use dotenv::dotenv;
-// use std::env;
+
 use db::establish_connection;
 
 #[actix_web::main]

@@ -1,5 +1,5 @@
 [package]
-name = "chat-backend"
+name = "backend"
 version = "0.1.0"
 edition = "2021"
 
@@ -25,18 +25,15 @@ futures-util = "0.3"
 dotenv = "0.15"
 sqlx = { version = "0.6", features = ["postgres", "runtime-tokio-native-tls", "macros","chrono","uuid"] }
 uuid = { version = "1.0", features = ["v4","serde"] }
-
 thiserror = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
-
-idna = "0.3"  # Use stable version of `idna`
-qrcode = "0.12.0"
-image = "0.23.14"
+url = "2.5.4" 
+idna = "1.0.3"
 
 [features]
 default = ["sqlx/postgres", "sqlx/runtime-tokio-native-tls"]
 
 # Explicitly define the binary entry point (optional)
 [[bin]]
-name = "chat-backend"
+name = "backend"
 path = "src/main.rs"  # Ensures the entry point is specified correctly
